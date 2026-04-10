@@ -7,12 +7,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/scheduler-frontend/dist/$1"
+      "destination": "/scheduler-frontend/dist/index.html"
     }
-  ],
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 15
-    }
-  }
+  ]
 }
