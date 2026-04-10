@@ -9,6 +9,8 @@
     "tunnel": "npx lt --port 5173 --subdomain omniscient-scheduler",
     "sync-dev": "concurrently \"npm run dev\" \"npm run tunnel\"",
     "build:frontend": "npm run build --prefix scheduler-frontend",
+    "build": "npm run build:frontend",
+    "postinstall": "npm install --prefix scheduler-frontend && npm install --prefix scheduler-backend",
     "package": "npm run build:frontend && electron-builder"
   },
   "dependencies": {
