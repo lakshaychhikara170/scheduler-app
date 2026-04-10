@@ -1,11 +1,30 @@
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
+const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
 let dbPromise;
+let pgPool;
+
+// Detect if we should use Postgres (Vercel uses POSTGRES_URL)
+const isPostgres = !!(process.env.DATABASE_URL || process.env.POSTGRES_URL);
+
+if (isPostgres) {
+  console.log('📡 Database: Running in POSTGRES mode');
+  pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
+    ssl: {
+      rejectUnauthorized: false // Required for Vercel/Neon Postgres
+    }
+  });
+} else {
+  console.log('📦 Database: Running in SQLITE mode');
+}
 
 const initDb = async () => {
+  if (isPostgres) return null; // No init needed for pgPool
+
   if (!dbPromise) {
     const dbPath = process.env.DB_PATH || path.join(__dirname, '../../../scheduler-database.sqlite');
     dbPromise = open({
@@ -16,22 +35,29 @@ const initDb = async () => {
     await db.exec('PRAGMA journal_mode = WAL;');
     await db.exec('PRAGMA foreign_keys = ON;');
     
-    const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-    await db.exec(schema);
+    const schemaPath = path.join(__dirname, 'schema.sql');
+    if (fs.existsSync(schemaPath)) {
+      const schema = fs.readFileSync(schemaPath, 'utf8');
+      await db.exec(schema);
+    }
   }
   return dbPromise;
 };
 
 const query = async (text, params = []) => {
+  if (isPostgres) {
+    const res = await pgPool.query(text, params);
+    return res;
+  }
+
   const db = await initDb();
   
+  // Adapt Postgres-style $1, $2 to SQLite-style ?
   let sqliteText = text.replace(/\$\d+/g, '?');
   sqliteText = sqliteText.replace(/NOW\(\)/gi, "datetime('now')");
-  // Replace ILIKE with LIKE for SQLite
   sqliteText = sqliteText.replace(/ILIKE/gi, "LIKE");
 
   const cleanParams = params.map(p => p === undefined ? null : p);
-
   const isSelect = /^\s*(SELECT|WITH|PRAGMA)/i.test(sqliteText) || /RETURNING/i.test(sqliteText);
   
   try {
@@ -49,10 +75,17 @@ const query = async (text, params = []) => {
 };
 
 const getClient = async () => {
+  if (isPostgres) {
+    return pgPool.connect();
+  }
   return {
     query: query,
     release: () => {}
   }
 };
 
-module.exports = { query, getClient, pool: { on: () => {} } };
+module.exports = { 
+  query, 
+  getClient, 
+  pool: isPostgres ? pgPool : { on: () => {} } 
+};

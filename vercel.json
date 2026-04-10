@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/scheduler-backend/src/app.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/scheduler-frontend/dist/$1"
+    }
+  ],
+  "functions": {
+    "scheduler-backend/src/app.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
+}

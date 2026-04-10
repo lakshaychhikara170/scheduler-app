@@ -23,12 +23,15 @@ app.get('/health', (req, res) => {
 const db = require('./db/pool');
 db.getClient().then(async client => {
   try {
-    await client.query('ALTER TABLE events ADD COLUMN attachments TEXT DEFAULT "[]"');
+    // Note: SQLite uses double quotes for string literals sometimes, but Postgres requires single quotes.
+    // Also ensuring queries are compatible with both.
+    await client.query("ALTER TABLE events ADD COLUMN attachments TEXT DEFAULT '[]'");
     await client.query('ALTER TABLE users ADD COLUMN push_topic TEXT');
-    console.log('Migrated tables: ADD COLUMN attachments, ADD COLUMN push_topic');
+    console.log('✅ Base migrations checked.');
   } catch (err) {
-    if (!err.message.includes('duplicate column name')) {
-      console.error('Schema migration error:', err);
+    // Ignore errors for existing columns
+    if (!err.message.includes('duplicate column name') && !err.message.includes('already exists')) {
+      console.error('⚠️ Schema migration error:', err.message);
     }
   } finally {
     client.release();
