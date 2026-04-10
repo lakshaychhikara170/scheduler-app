@@ -1,0 +1,23 @@
+{
+  "name": "ai-scheduler-desktop",
+  "version": "1.0.0",
+  "description": "Omniscient AI Scheduler Native Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"cd scheduler-frontend && npm run dev\" \"cd scheduler-backend && npx nodemon src/app.js\" \"npm run tunnel\" \"wait-on http://localhost:5173 && electron .\"",
+    "tunnel": "npx lt --port 5173 --subdomain omniscient-scheduler",
+    "sync-dev": "concurrently \"npm run dev\" \"npm run tunnel\"",
+    "build:frontend": "npm run build --prefix scheduler-frontend",
+    "package": "npm run build:frontend && electron-builder"
+  },
+  "dependencies": {
+    "electron-is-dev": "^2.0.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "concurrently": "^8.2.0",
+    "wait-on": "^7.2.0",
+    "electron-builder": "^24.6.0"
+  }
+}
