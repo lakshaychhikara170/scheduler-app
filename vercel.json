@@ -11,6 +11,8 @@
     }
   ],
   "functions": {
-    "api/index.js": {}
+    "api/index.js": {
+      "maxDuration": 15
+    }
   }
 }
