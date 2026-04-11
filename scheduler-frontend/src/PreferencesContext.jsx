@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import api from './api';
 
 const PreferencesContext = createContext();
 
@@ -9,8 +10,8 @@ const DEFAULT_PRESETS = [
     gender: 'Neutral',
     personality: 'Sweet',
     botImage: '/bot-icon.png',
-    botShyImage: '/bot-icon.png',
-    botAngryImage: '/bot-angry-icon.jpg',
+    botShyImage: '/bot-shy-icon.png',
+    botAngryImage: '/bot-angry-icon.png',
     accentColor: '#a855f7',
     description: 'The original helpful companion.',
     remarks: [
@@ -47,8 +48,8 @@ export const PreferencesProvider = ({ children }) => {
       botGender: 'Neutral',
       botPersonality: 'Sweet',
       botImage: '/bot-icon.png',
-      botShyImage: '/bot-icon.png',
-      botAngryImage: '/bot-angry-icon.jpg',
+      botShyImage: '/bot-shy-icon.png',
+      botAngryImage: '/bot-angry-icon.png',
       botAngrySize: 130,
       botAngrySpeed: 1500,
       botAngryDuration: 4000,
@@ -101,6 +102,19 @@ export const PreferencesProvider = ({ children }) => {
   const updatePreference = (key, value) => {
     setPreferences(prev => ({ ...prev, [key]: value }));
   };
+
+  // Sync userName back to the backend so it persists across devices
+  const syncTimerRef = useRef(null);
+  useEffect(() => {
+    const token = localStorage.getItem('scheduler_token');
+    if (!token || !preferences.userName) return;
+    // Debounce to avoid spamming the API while typing
+    if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+    syncTimerRef.current = setTimeout(() => {
+      api.patch('/auth/me', { name: preferences.userName }).catch(() => {});
+    }, 1500);
+    return () => { if (syncTimerRef.current) clearTimeout(syncTimerRef.current); };
+  }, [preferences.userName]);
 
   // Activate a preset: apply its settings to the live bot config
   const activatePreset = (preset) => {

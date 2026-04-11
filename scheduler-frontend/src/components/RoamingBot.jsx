@@ -544,7 +544,7 @@ export default function RoamingBot() {
             style={{ animation: preferences.botBouncing !== false ? 'bounce 1s infinite' : 'none' }}
             className={`select-none pointer-events-none w-full h-full flex items-end justify-center ${preferences.botShape !== 'natural' ? 'absolute inset-0' : ''}`}
           >
-            <img src={getActiveImage()} alt="Bot Avatar" className={`${getImgShapeClass()} ${preferences.botShape === 'natural' ? 'drop-shadow-2xl' : ''}`} style={{ mixBlendMode: 'screen' }} draggable={false} />
+            <img src={getActiveImage()} alt="Bot Avatar" className={`${getImgShapeClass()} ${preferences.botShape === 'natural' ? 'drop-shadow-2xl' : ''}`} draggable={false} />
           </div>
           <style>{`@keyframes bounce { 0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(0.8,0,1,1); } 50% { transform: translateY(-20%); animation-timing-function: cubic-bezier(0,0,0.2,1); } }`}</style>
 

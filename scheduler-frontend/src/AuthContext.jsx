@@ -11,7 +11,18 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('scheduler_token');
     if (token) {
       api.get('/auth/me')
-        .then(res => setUser(res.data))
+        .then(res => {
+          setUser(res.data);
+          // Populate userName from server if local pref is still the default
+          try {
+            const saved = localStorage.getItem('scheduler_prefs');
+            const parsed = saved ? JSON.parse(saved) : null;
+            if (parsed && (!parsed.userName || parsed.userName === 'User') && res.data.name) {
+              parsed.userName = res.data.name;
+              localStorage.setItem('scheduler_prefs', JSON.stringify(parsed));
+            }
+          } catch (e) { /* ignore */ }
+        })
         .catch(() => {
           localStorage.removeItem('scheduler_token');
         })
@@ -24,13 +35,33 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
     localStorage.setItem('scheduler_token', res.data.accessToken);
-    setUser(res.data.user);
+    const userData = res.data.user;
+    setUser(userData);
+    // Populate userName from server if local pref is still the default
+    try {
+      const saved = localStorage.getItem('scheduler_prefs');
+      const parsed = saved ? JSON.parse(saved) : null;
+      if (parsed && (!parsed.userName || parsed.userName === 'User') && userData.name) {
+        parsed.userName = userData.name;
+        localStorage.setItem('scheduler_prefs', JSON.stringify(parsed));
+      }
+    } catch (e) { /* ignore */ }
   };
 
   const register = async (email, password, name) => {
     const res = await api.post('/auth/register', { email, password, name });
     localStorage.setItem('scheduler_token', res.data.accessToken);
-    setUser(res.data.user);
+    const userData = res.data.user;
+    setUser(userData);
+    // Populate userName from the registration name
+    try {
+      const saved = localStorage.getItem('scheduler_prefs');
+      const parsed = saved ? JSON.parse(saved) : null;
+      if (parsed && userData.name) {
+        parsed.userName = parsed.userName && parsed.userName !== 'User' ? parsed.userName : userData.name;
+        localStorage.setItem('scheduler_prefs', JSON.stringify(parsed));
+      }
+    } catch (e) { /* ignore */ }
   };
 
   const logout = () => {

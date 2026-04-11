@@ -1,0 +1,13 @@
+INSTRUCTIONS: Replace Bot Images
+=================================
+
+Please copy your 3 uploaded Rem images to this public/ folder with the following exact filenames:
+
+1. bot-icon.png        → Normal/default pose (the first image you uploaded)
+2. bot-angry-icon.png  → Angry/annoyed pose (the second image you uploaded)
+3. bot-shy-icon.png    → Shy/flustered pose (the third image you uploaded)
+
+After copying, the app will automatically use the new images.
+
+Note: The old bot-angry-icon.jpg has been replaced with bot-angry-icon.png
+(the code has been updated to reference the .png version)

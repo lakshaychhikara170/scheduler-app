@@ -262,10 +262,12 @@ export default function Settings() {
                     <label className="text-[10px] font-bold uppercase tracking-widest block mb-1 opacity-50" style={{ color: 'var(--text-main)' }}>Operator Name</label>
                     <input 
                         type="text"
-                        value={preferences.userName || 'User'}
+                        value={preferences.userName ?? ''}
                         onChange={(e) => updatePreference('userName', e.target.value)}
+                        onBlur={(e) => { if (!e.target.value.trim()) updatePreference('userName', ''); }}
                         className="w-full bg-transparent border-b text-lg font-bold focus:outline-none transition-all py-1"
                         style={{ color: 'var(--text-main)', borderColor: 'var(--panel-border)' }}
+                        placeholder="Enter your name..."
                     />
                     <div className="flex items-center gap-2 mt-2">
                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
@@ -350,7 +352,7 @@ export default function Settings() {
                 <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-2 block" style={{ color: 'var(--text-main)' }}>Identity Name</label>
                 <input 
                   type="text"
-                  value={preferences.botName || 'Assistant Buddy'}
+                  value={preferences.botName ?? ''}
                   onChange={(e) => updatePreference('botName', e.target.value)}
                   className="w-full rounded-lg px-3 py-2 focus:outline-none transition-all text-sm"
                   style={{ 
@@ -452,7 +454,7 @@ export default function Settings() {
                 <div className="border p-5 rounded-xl space-y-4 transition-colors" style={{ backgroundColor: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
                     <div className="flex items-center gap-6">
                         <div className="w-20 h-20 rounded-lg border flex items-center justify-center overflow-hidden flex-shrink-0" style={{ backgroundColor: 'transparent', borderColor: 'var(--panel-border)' }}>
-                            <img src={previewImage} alt="Normal Preview" className="w-full h-full object-contain" style={{ mixBlendMode: 'screen' }} />
+                            <img src={previewImage} alt="Normal Preview" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <strong className="block font-medium mb-2" style={{ color: 'var(--text-main)' }}>Default Appearance</strong>
@@ -466,7 +468,7 @@ export default function Settings() {
                     {/* Shy / Flustered Icon */}
                     <div className="flex items-center gap-6 pt-4 border-t" style={{ borderColor: 'var(--panel-border)' }}>
                         <div className="w-20 h-20 rounded-lg border flex items-center justify-center overflow-hidden flex-shrink-0" style={{ backgroundColor: 'transparent', borderColor: 'var(--primary)', boxShadow: '0 0 12px rgba(var(--primary-rgb),0.2)' }}>
-                            <img src={previewShyImage} alt="Shy Preview" className="w-full h-full object-contain" style={{ mixBlendMode: 'screen' }} />
+                            <img src={previewShyImage} alt="Shy Preview" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <strong className="block font-medium mb-1" style={{ color: 'var(--primary)' }}>🌸 "Shy" Appearance (When Chat Opens)</strong>
@@ -481,7 +483,7 @@ export default function Settings() {
                     {/* Angry Icon */}
                     <div className="flex items-center gap-6 pt-4 border-t" style={{ borderColor: 'var(--panel-border)' }}>
                         <div className="w-20 h-20 rounded-lg border flex items-center justify-center overflow-hidden flex-shrink-0" style={{ backgroundColor: 'transparent', borderColor: 'var(--panel-border)' }}>
-                            <img src={previewAngryImage} alt="Angry Preview" className="w-full h-full object-contain" style={{ mixBlendMode: 'screen' }} />
+                            <img src={previewAngryImage} alt="Angry Preview" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <strong className="text-red-500 block font-medium mb-2">"Angry" Appearance (When Dragged)</strong>

@@ -53,7 +53,7 @@ const getEvents = async (req, res) => {
       WHERE user_id = $1
         AND parent_event_id IS NULL
         AND ($2 IS NULL OR start_time >= $2)
-        AND ($3 IS NULL OR end_time <= $3)
+        AND ($3 IS NULL OR start_time <= $3)
         AND ($4 IS NULL OR status = $4)
       ORDER BY start_time ASC
     `;

@@ -70,12 +70,19 @@ export default function GoalList({ type }) {
     let remindersPayload = [];
     const remainingMinutes = Math.floor((start.getTime() - Date.now()) / 60000);
 
+    // Generate interval-based reminders; if interval exceeds remaining time, add smart fallbacks
     const generateIntervalReminders = (intervalMinutes) => {
       const arr = [];
       for (let m = intervalMinutes; m <= remainingMinutes; m += intervalMinutes) {
         arr.push({ minutes_before: m, method: 'push' });
       }
-      if (remainingMinutes >= 0) {
+      // If no interval reminders were created (deadline too soon), add smart fallbacks
+      if (arr.length === 0) {
+        const fallbacks = [60, 30, 15, 10].filter(m => m <= remainingMinutes);
+        fallbacks.forEach(m => arr.push({ minutes_before: m, method: 'push' }));
+      }
+      // Always include an at-deadline reminder if the deadline is in the future
+      if (remainingMinutes >= 0 && !arr.find(r => r.minutes_before === 0)) {
         arr.push({ minutes_before: 0, method: 'push' });
       }
       return arr;
@@ -112,18 +119,19 @@ export default function GoalList({ type }) {
     } else if (notificationSetting === 'twice_a_month') {
       remindersPayload = generateIntervalReminders(15 * 24 * 60);
     } else if (notificationSetting === '10m') {
-      remindersPayload = [{ minutes_before: 10, method: 'push' }];
+      remindersPayload = [{ minutes_before: 10, method: 'push' }, { minutes_before: 0, method: 'push' }];
     } else if (notificationSetting === '1h') {
-      remindersPayload = [{ minutes_before: 60, method: 'push' }];
+      remindersPayload = [{ minutes_before: 60, method: 'push' }, { minutes_before: 0, method: 'push' }];
     } else if (notificationSetting === '24h') {
-      remindersPayload = [{ minutes_before: 24 * 60, method: 'push' }];
+      remindersPayload = [{ minutes_before: 24 * 60, method: 'push' }, { minutes_before: 0, method: 'push' }];
     } else if (notificationSetting === '3d') {
-      remindersPayload = [{ minutes_before: 3 * 24 * 60, method: 'push' }];
+      remindersPayload = [{ minutes_before: 3 * 24 * 60, method: 'push' }, { minutes_before: 0, method: 'push' }];
     } else if (notificationSetting === '1w') {
-      remindersPayload = [{ minutes_before: 7 * 24 * 60, method: 'push' }];
+      remindersPayload = [{ minutes_before: 7 * 24 * 60, method: 'push' }, { minutes_before: 0, method: 'push' }];
     }
 
-    if (notificationSetting !== 'none') {
+    // Ensure non-'none' modes always have at least an at-deadline reminder if deadline is future
+    if (notificationSetting !== 'none' && remainingMinutes >= 0) {
       if (!remindersPayload.find(r => r.minutes_before === 0)) {
         remindersPayload.push({ minutes_before: 0, method: 'push' });
       }
