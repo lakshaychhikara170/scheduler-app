@@ -23,14 +23,24 @@ export default function CalendarView() {
   };
 
   const fetchMonthEvents = async () => {
-    const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString();
-    const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59).toISOString();
-    
+    // Use local midnight boundaries to avoid timezone-shift issues (e.g. IST = UTC+5:30)
+    const y = currentDate.getFullYear();
+    const m = currentDate.getMonth();
+    const startLocal = new Date(y, m, 1, 0, 0, 0, 0);
+    const endLocal   = new Date(y, m + 1, 0, 23, 59, 59, 999); // last day of month
+    // Convert local midnight to ISO preserving local date
+    const toLocalISO = (d) => {
+      const off = d.getTimezoneOffset() * 60000;
+      return new Date(d.getTime() - off).toISOString();
+    };
+    const start = toLocalISO(startLocal);
+    const end   = toLocalISO(endLocal);
     try {
       const res = await api.get(`/events?start=${start}&end=${end}`);
-      setEvents(res.data.events);
+      setEvents(res.data.events || []);
     } catch (err) {
       console.error('Failed to fetch calendar events', err);
+      setEvents([]);
     }
   };
 
@@ -111,7 +121,10 @@ export default function CalendarView() {
     
     const dayEvents = events.filter(e => {
       const eDate = new Date(e.start_time);
-      return eDate >= dayStart && eDate <= dayEnd;
+      // Compare using local date string to avoid timezone offset issues
+      const eDateLocal = `${eDate.getFullYear()}-${eDate.getMonth()}-${eDate.getDate()}`;
+      const dayLocal   = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${d}`;
+      return eDateLocal === dayLocal;
     });
     
     calendarGrid.push({ empty: false, date: d, dayEvents, isWeekend, fullDate: defaultDate });

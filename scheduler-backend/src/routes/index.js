@@ -58,7 +58,7 @@ router.post('/events', authenticate, [
   body('is_recurring').optional().isBoolean(),
   body('recurrence_rule').optional().isIn(['daily', 'weekly', 'biweekly', 'monthly', 'yearly', 'lifetime']),
   body('reminders').optional().isArray(),
-  body('reminders.*.minutes_before').optional().isInt({ min: 1 }),
+  body('reminders.*.minutes_before').optional().isInt({ min: 0 }),
   body('reminders.*.method').optional().isIn(['push', 'email', 'sms']),
 ], validate, events.createEvent);
 

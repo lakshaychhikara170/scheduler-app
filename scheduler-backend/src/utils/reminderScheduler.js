@@ -17,8 +17,8 @@ const startReminderScheduler = () => {
          JOIN users u ON u.id = r.user_id
          WHERE r.sent = FALSE
            AND e.status = 'active'
-           AND r.remind_at <= datetime('now')
-           AND r.remind_at >= datetime('now', '-5 minutes')`
+           AND r.remind_at <= NOW()
+           AND r.remind_at >= NOW() - INTERVAL '5 minutes'`
       );
 
       if (result.rows.length === 0) return;

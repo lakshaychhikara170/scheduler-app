@@ -184,7 +184,7 @@ const updateEvent = async (req, res) => {
           recurrence_end_date = COALESCE($10, recurrence_end_date),
           recurrence_count = COALESCE($11, recurrence_count),
           attachments = COALESCE($12, attachments),
-          updated_at = datetime('now')
+          updated_at = NOW()
         WHERE id = $13 AND user_id = $14 RETURNING *`,
         [title, description, location, start_time, end_time, all_day, color, status,
          recurrence_rule, recurrence_end_date, recurrence_count, serializedAttachments, req.params.id, req.user.id]
@@ -197,7 +197,7 @@ const updateEvent = async (req, res) => {
           end_time = COALESCE($5, end_time), all_day = COALESCE($6, all_day),
           color = COALESCE($7, color), status = COALESCE($8, status),
           attachments = COALESCE($9, attachments),
-          updated_at = datetime('now')
+          updated_at = NOW()
         WHERE id = $10 AND user_id = $11 RETURNING *`,
         [title, description, location, start_time, end_time, all_day, color, status,
          serializedAttachments, req.params.id, req.user.id]
@@ -247,7 +247,7 @@ const getUpcoming = async (req, res) => {
          FILTER (WHERE r.id IS NOT NULL) as reminders
        FROM events e
        LEFT JOIN reminders r ON r.event_id = e.id AND r.sent = FALSE
-       WHERE e.user_id = $1 AND e.start_time >= datetime('now') AND e.status = 'active'
+       WHERE e.user_id = $1 AND e.start_time >= NOW() AND e.status = 'active'
        GROUP BY e.id
        ORDER BY e.start_time ASC
        LIMIT $2`,

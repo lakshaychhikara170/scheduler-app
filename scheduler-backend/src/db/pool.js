@@ -55,6 +55,8 @@ const query = async (text, params = []) => {
   // Adapt Postgres-style $1, $2 to SQLite-style ?
   let sqliteText = text.replace(/\$\d+/g, '?');
   sqliteText = sqliteText.replace(/NOW\(\)/gi, "datetime('now')");
+  // Convert "datetime('now') - INTERVAL 'N unit'" to SQLite modifier syntax
+  sqliteText = sqliteText.replace(/datetime\('now'\)\s*-\s*INTERVAL\s+'(\d+)\s+(\w+)'/gi, (_, n, unit) => `datetime('now', '-${n} ${unit}')`);
   sqliteText = sqliteText.replace(/ILIKE/gi, "LIKE");
 
   const cleanParams = params.map(p => p === undefined ? null : p);
