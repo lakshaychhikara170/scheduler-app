@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const db = require('../db/pool');
 
 const ACCESS_TOKEN_TTL = '30d';
@@ -13,7 +13,7 @@ const generateTokens = async (user) => {
     { expiresIn: ACCESS_TOKEN_TTL }
   );
 
-  const refreshToken = uuidv4();
+  const refreshToken = crypto.randomUUID();
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_TTL_DAYS);
 
