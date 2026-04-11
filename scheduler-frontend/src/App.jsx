@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
 import { PreferencesProvider, usePreferences } from './PreferencesContext';
 import Login from './components/Login';
@@ -9,6 +9,19 @@ import Settings from './components/Settings';
 import CalendarView from './components/CalendarView';
 import Home from './components/Home';
 import { Target, CalendarDays, CalendarCheck, CalendarRange, Calendar, LogOut, Settings as SettingsIcon, Zap } from 'lucide-react';
+
+// Moved outside component so it is stable and not re-created on every render
+const hexToRgb = (hex) => {
+  if (!hex) return '0,0,0';
+  let h = hex.replace('#', '');
+  if (h.length === 3) {
+    h = h.split('').map(char => char + char).join('');
+  }
+  const r = parseInt(h.slice(0, 2), 16) || 0;
+  const g = parseInt(h.slice(2, 4), 16) || 0;
+  const b = parseInt(h.slice(4, 6), 16) || 0;
+  return `${r},${g},${b}`;
+};
 
 const Sidebar = () => {
   const { logout, user } = useAuth();
@@ -50,7 +63,7 @@ const Sidebar = () => {
 
       <nav className="flex-1 px-4 py-2 space-y-1">
         {links.map(link => {
-          const active = location.pathname.startsWith(link.path) || (location.pathname === '/' && link.path === '/daily');
+          const active = location.pathname.startsWith(link.path) || (location.pathname === '/' && link.path === '/home');
           return (
             <Link
               key={link.name}
@@ -123,18 +136,7 @@ const AppLayout = () => {
   const primary = preferences.themePrimary || '#3b82f6';
   const accent = preferences.themeAccent || '#8b5cf6';
 
-  // Derive RGB components for use in rgba() expressions
-  const hexToRgb = (hex) => {
-    if (!hex) return '0,0,0';
-    let h = hex.replace('#', '');
-    if (h.length === 3) {
-      h = h.split('').map(char => char + char).join('');
-    }
-    const r = parseInt(h.slice(0, 2), 16) || 0;
-    const g = parseInt(h.slice(2, 4), 16) || 0;
-    const b = parseInt(h.slice(4, 6), 16) || 0;
-    return `${r},${g},${b}`;
-  };
+  // hexToRgb is stable (defined at module level)
 
   useEffect(() => {
     const root = document.documentElement;
@@ -151,7 +153,7 @@ const AppLayout = () => {
     root.style.setProperty('--primary-rgb', hexToRgb(primary));
     root.style.setProperty('--accent-rgb', hexToRgb(accent));
     root.style.setProperty('--glass-blur', `${glassIntensity}px`);
-  }, [isLight, primary, accent, glassIntensity, hexToRgb]);
+  }, [isLight, primary, accent, glassIntensity]);
 
   return (
     <BrowserRouter>
@@ -178,7 +180,7 @@ const AppLayout = () => {
         <main className="flex-1 overflow-auto relative z-10">
           <div className="max-w-4xl mx-auto py-8 px-8">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Navigate to="/home" replace />} />
               <Route path="/home" element={<Home />} />
               <Route path="/daily" element={<GoalList type="daily" />} />
               <Route path="/weekly" element={<GoalList type="weekly" />} />

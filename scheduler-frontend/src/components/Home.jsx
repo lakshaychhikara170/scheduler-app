@@ -51,12 +51,12 @@ export default function Home() {
 
       types.forEach((type, i) => {
         const goals = (results[i].data && results[i].data.events) || [];
-        const completed = goals.filter(g => g.completed).length;
+        const completed = goals.filter(g => g.status === 'completed').length;
         newStats[type] = { total: goals.length, completed, pct: goals.length ? Math.round((completed / goals.length) * 100) : 0 };
 
-        goals.filter(g => !g.completed).forEach(g => {
-          if (g.deadline) {
-            const dl = new Date(g.deadline);
+        goals.filter(g => g.status !== 'completed').forEach(g => {
+          if (g.start_time) {
+            const dl = new Date(g.start_time);
             if (dl < now) overdueGoals.push({ ...g, type });
             else if (dl - now < 86400000) todayGoals.push({ ...g, type });
           } else if (type === 'daily') {
