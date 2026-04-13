@@ -9,14 +9,13 @@ let pgPool;
 const isPostgres = !!(process.env.DATABASE_URL || process.env.POSTGRES_URL);
 
 if (isPostgres) {
+  // Disable TLS cert validation for cloud Postgres providers (Neon, Supabase, Railway)
+  // that use self-signed cert chains. Must be set before Pool is created.
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   console.log('📡 Database: Running in POSTGRES mode');
   pgPool = new Pool({
     connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
-    ssl: process.env.DATABASE_URL?.includes('localhost') ? false : {
-      rejectUnauthorized: false,
-      // Handle self-signed cert chains from Neon/Supabase/Railway
-      checkServerIdentity: () => undefined,
-    }
+    ssl: { rejectUnauthorized: false }
   });
 } else {
   // Only load SQLite packages in local/non-serverless environments
