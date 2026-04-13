@@ -10,7 +10,30 @@ const PORT = process.env.PORT || 3000;
 
 // ── Security & Parsing ───────────────────────────────────────────
 app.use(helmet());
-app.use(cors());
+
+const allowedOrigins = [
+  'https://scheduler-frontend-iota.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  // Allow any Vercel preview deployments for this project
+  /https:\/\/scheduler-frontend.*\.vercel\.app$/,
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    const allowed = allowedOrigins.some(o =>
+      typeof o === 'string' ? o === origin : o.test(origin)
+    );
+    if (allowed) return callback(null, true);
+    callback(new Error(`CORS: Origin ${origin} not allowed`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
 
