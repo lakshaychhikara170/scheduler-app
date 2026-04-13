@@ -1,5 +1,3 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
@@ -19,6 +17,7 @@ if (isPostgres) {
     }
   });
 } else {
+  // Only load SQLite packages in local/non-serverless environments
   console.log('📦 Database: Running in SQLITE mode');
 }
 
@@ -26,6 +25,9 @@ const initDb = async () => {
   if (isPostgres) return null; // No init needed for pgPool
 
   if (!dbPromise) {
+    // Lazy-load sqlite packages so they are never touched in Postgres/Vercel mode
+    const sqlite3 = require('sqlite3');
+    const { open } = require('sqlite');
     const dbPath = process.env.DB_PATH || path.join(__dirname, '../../../scheduler-database.sqlite');
     dbPromise = open({
       filename: dbPath,
