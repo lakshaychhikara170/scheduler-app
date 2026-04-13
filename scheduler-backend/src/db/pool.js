@@ -12,8 +12,10 @@ if (isPostgres) {
   console.log('📡 Database: Running in POSTGRES mode');
   pgPool = new Pool({
     connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
-    ssl: {
-      rejectUnauthorized: false // Required for Vercel/Neon Postgres
+    ssl: process.env.DATABASE_URL?.includes('localhost') ? false : {
+      rejectUnauthorized: false,
+      // Handle self-signed cert chains from Neon/Supabase/Railway
+      checkServerIdentity: () => undefined,
     }
   });
 } else {
