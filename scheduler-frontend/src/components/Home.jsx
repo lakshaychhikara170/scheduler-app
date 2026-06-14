@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { usePreferences } from '../PreferencesContext';
-import { useAuth } from '../AuthContext';
 import api from '../api';
 import {
   Target, CheckCircle2, Clock, TrendingUp, CalendarDays, 
@@ -30,14 +29,13 @@ const motivationalLines = [
 
 export default function Home() {
   const { preferences } = usePreferences();
-  const { user } = useAuth();
   const [stats, setStats] = useState({ daily: {}, weekly: {}, monthly: {}, yearly: {} });
   const [overdue, setOverdue] = useState([]);
   const [today, setToday] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quote] = useState(() => motivationalLines[new Date().getDay() % motivationalLines.length]);
   const greeting = getGreeting();
-  const userName = preferences.userName || user?.name || 'there';
+  const userName = preferences.userName || 'there';
 
   const fetchAll = useCallback(async () => {
     setLoading(true);

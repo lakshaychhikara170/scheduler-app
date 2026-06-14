@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './AuthContext';
 import { PreferencesProvider, usePreferences } from './PreferencesContext';
-import Login from './components/Login';
 import GoalList from './components/GoalList';
 import RoamingBot from './components/RoamingBot';
 import Settings from './components/Settings';
 import CalendarView from './components/CalendarView';
 import Home from './components/Home';
-import { Target, CalendarDays, CalendarCheck, CalendarRange, Calendar, LogOut, Settings as SettingsIcon, Zap } from 'lucide-react';
+import { Target, CalendarDays, CalendarCheck, CalendarRange, Calendar, Settings as SettingsIcon, Zap } from 'lucide-react';
 
 // Moved outside component so it is stable and not re-created on every render
 const hexToRgb = (hex) => {
@@ -24,11 +22,10 @@ const hexToRgb = (hex) => {
 };
 
 const Sidebar = () => {
-  const { logout, user } = useAuth();
   const { preferences } = usePreferences();
   const location = useLocation();
 
-  const userName = preferences.userName || user?.name || 'User';
+  const userName = preferences.userName || 'User';
   const userAvatar = preferences.userAvatar;
 
   const links = [
@@ -98,7 +95,7 @@ const Sidebar = () => {
       </div>
 
       <div className="p-4 border-t border-zinc-800 bg-black/20">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-white/5 overflow-hidden flex-shrink-0">
             {userAvatar ? (
                <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
@@ -110,15 +107,7 @@ const Sidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-white truncate">{userName}</p>
-            <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-black">Authorized</p>
           </div>
-          <button 
-            onClick={logout}
-            className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
-            title="Log out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
         </div>
       </div>
     </div>
@@ -126,17 +115,12 @@ const Sidebar = () => {
 };
 
 const AppLayout = () => {
-  const { user } = useAuth();
   const { preferences } = usePreferences();
   
-  if (!user) return <Login />;
-
   const isLight = preferences.appTheme === 'Light';
   const glassIntensity = preferences.glassIntensity ?? 20;
   const primary = preferences.themePrimary || '#3b82f6';
   const accent = preferences.themeAccent || '#8b5cf6';
-
-  // hexToRgb is stable (defined at module level)
 
   useEffect(() => {
     const root = document.documentElement;
@@ -198,11 +182,9 @@ const AppLayout = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <PreferencesProvider>
-        <AppLayout />
-      </PreferencesProvider>
-    </AuthProvider>
+    <PreferencesProvider>
+      <AppLayout />
+    </PreferencesProvider>
   );
 }
 
