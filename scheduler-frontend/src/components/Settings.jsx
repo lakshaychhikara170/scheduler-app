@@ -37,8 +37,8 @@ export default function Settings() {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Output as highly optimized webp/jpeg to radically reduce base64 string footprint
-        callback(canvas.toDataURL('image/webp', 0.8));
+        // Use PNG to preserve transparency (important for bot images with no background)
+        callback(canvas.toDataURL('image/png'));
       };
       img.src = event.target.result;
     };
