@@ -102,7 +102,7 @@ export default function MobileSync() {
             <div className="p-4 rounded-xl border border-white/5 bg-black/10">
               <p className="text-xs font-bold mb-2" style={{ color: 'var(--text-main)' }}>1. Install ntfy App</p>
               <p className="text-[10px] opacity-60 mb-3" style={{ color: 'var(--text-main)' }}>Search for "ntfy" on Google Play or App Store.</p>
-              <a href="https://ntfy.sh/#subscribe" target="_blank" className="text-[10px] text-primary font-bold hover:underline flex items-center gap-1">
+              <a href="https://ntfy.sh/#subscribe" target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary font-bold hover:underline flex items-center gap-1">
                 Install Link <ExternalLink className="w-2 h-2" />
               </a>
             </div>

@@ -33,6 +33,8 @@ export const PreferencesProvider = ({ children }) => {
         // Ensure botPresets always exists for old saves
         if (!parsed.botPresets) parsed.botPresets = DEFAULT_PRESETS;
         if (!parsed.activePresetId) parsed.activePresetId = null;
+        // Gemini key is stored in sessionStorage (not localStorage) for security
+        parsed.geminiApiKey = sessionStorage.getItem('scheduler_gemini_key') || '';
         return parsed;
       }
     } catch(e) {
@@ -85,14 +87,22 @@ export const PreferencesProvider = ({ children }) => {
       ],
       botPresets: DEFAULT_PRESETS,
       activePresetId: null,
-      ntfyTopic: `scheduler_${Math.random().toString(36).substring(7)}`,
+      ntfyTopic: `scheduler_${Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2,'0')).join('')}`,
       mobileSyncEnabled: false,
+      geminiApiKey: sessionStorage.getItem('scheduler_gemini_key') || '',
     };
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('scheduler_prefs', JSON.stringify(preferences));
+      // Scrub sensitive keys before saving to localStorage
+      const { geminiApiKey, ...safePrefs } = preferences;
+      localStorage.setItem('scheduler_prefs', JSON.stringify(safePrefs));
+      // Gemini API key stored separately in sessionStorage (tab-isolated, not written to disk)
+      if (geminiApiKey !== undefined) {
+        if (geminiApiKey) sessionStorage.setItem('scheduler_gemini_key', geminiApiKey);
+        else sessionStorage.removeItem('scheduler_gemini_key');
+      }
     } catch (e) {
       console.error('Failed to save preferences (Quota possibly exceeded!):', e);
       alert('Local storage limit reached. Please upload a smaller image file!');

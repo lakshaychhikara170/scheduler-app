@@ -17,7 +17,7 @@ const save = (events) => {
   localStorage.setItem(KEY, JSON.stringify(events));
 };
 
-const randomId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const randomId = () => crypto.randomUUID();
 
 export const localStore = {
   getEvents(params = {}) {

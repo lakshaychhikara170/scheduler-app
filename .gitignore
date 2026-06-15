@@ -17,6 +17,11 @@ build/
 .env.test.local
 .env.production.local
 
+# Credentials / Auth files
+auth.json
+*.key
+*.pem
+
 # Databases (Sensitive User Data)
 *.sqlite
 *.sqlite-journal

@@ -2,36 +2,56 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const routes = require('./routes');
 const { startReminderScheduler } = require('./utils/reminderScheduler');
 
-// ── Ensure JWT_SECRET is always set ──────────────────────────────
+// ── Require JWT_SECRET ──────────────────────────────────────────
 if (!process.env.JWT_SECRET) {
-  // Generate a stable secret based on a fixed seed so tokens survive restarts
-  // in the same process, but warn loudly since this won't persist across cold starts
-  process.env.JWT_SECRET = crypto.randomBytes(64).toString('hex');
-  console.warn('⚠️  JWT_SECRET not set in environment! Using a temporary secret. Set JWT_SECRET in Vercel environment variables for persistent login sessions.');
+  console.error('FATAL: JWT_SECRET environment variable is not set. Set it in Vercel environment variables or your .env file.');
+  process.exit(1);
 }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProd = process.env.NODE_ENV === 'production';
 
 // ── Security & Parsing ───────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", 'https:'],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Allow images from external sources
+}));
+
+// Trust proxy (needed for rate limiting behind Vercel/Nginx)
+app.set('trust proxy', 1);
 
 const allowedOrigins = [
   'https://scheduler-frontend-iota.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:3000',
-  // Allow any Vercel preview deployments for this project
-  /https:\/\/scheduler-frontend.*\.vercel\.app$/,
+  // Tighter regex: only allow exact project preview URLs (prevents subdomain spoofing)
+  /^https:\/\/scheduler-frontend-[a-z0-9-]+\.vercel\.app$/,
+  // Allow localhost only in development
+  ...(isProd ? [] : ['http://localhost:5173', 'http://localhost:3000']),
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
+    // Block requests with no origin in production (e.g. suspicious server-to-server)
+    if (!origin) {
+      if (isProd) return callback(new Error('CORS: No origin header'));
+      return callback(null, true); // Allow no-origin in dev (curl, Postman etc)
+    }
     const allowed = allowedOrigins.some(o =>
       typeof o === 'string' ? o === origin : o.test(origin)
     );
@@ -43,8 +63,18 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(express.json({ limit: '500mb' }));
-app.use(express.urlencoded({ limit: '500mb', extended: true }));
+// ── Global rate limiter (all routes) ────────────────────────────
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
+app.use(globalLimiter);
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // ── Health check ─────────────────────────────────────────────────
 app.get('/health', (req, res) => {
@@ -147,12 +177,15 @@ app.use('/api/v1', routes);
 
 // ── 404 handler ──────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
+  res.status(404).json({ error: 'Not found' });
 });
 
 // ── Global error handler ─────────────────────────────────────────
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
+  // Never leak stack traces or internal error details to clients
+  const isProd = process.env.NODE_ENV === 'production';
+  if (!isProd) console.error('Unhandled error:', err);
+  else console.error('Unhandled error:', err.message); // Only log message in prod
   res.status(500).json({ error: 'Internal server error' });
 });
 

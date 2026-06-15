@@ -19,10 +19,13 @@ export default function Settings() {
     setGeminiStatus('testing');
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key.trim()}`,
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': key.trim(), // Header is safer than URL query param
+          },
           body: JSON.stringify({ contents: [{ parts: [{ text: 'Say hi in one word.' }] }] })
         }
       );
@@ -112,7 +115,9 @@ export default function Settings() {
   };
 
   const exportData = () => {
-    const data = JSON.stringify(preferences, null, 2);
+    // Scrub sensitive fields before exporting
+    const { geminiApiKey, userAvatar, botImage, botShyImage, botAngryImage, ...safePrefs } = preferences;
+    const data = JSON.stringify(safePrefs, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -125,6 +130,8 @@ export default function Settings() {
   const resetApp = () => {
     if (confirm("Are you SURE you want to reset everything? This will clear ALL settings and your custom remarks!!")) {
       localStorage.removeItem('scheduler_prefs');
+      sessionStorage.removeItem('scheduler_gemini_key');
+      localStorage.removeItem('scheduler_local_events');
       window.location.reload();
     }
   };
