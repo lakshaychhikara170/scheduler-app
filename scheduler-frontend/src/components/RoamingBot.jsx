@@ -490,12 +490,12 @@ You can chat naturally, answer questions about their goals, give motivation, and
     // ── HELP ─────────────────────────────────────────────────────────
     else if (lc.match(/(help|what can you do|commands)/)) {
       setTimeout(() => bot(
-        `Here's what I can do for you:\n\n📋 **Goals:**\n• "List my daily goals"\n• "Add weekly goal called [name]"\n• "Complete goal [name]"\n• "Delete goal [name]"\n• "How am I doing?"\n• "Tell me about goal [name]"\n\n🎛 **My settings:**\n• "Become a circle/square"\n• "Stop moving / Start moving"\n• "Stop jumping / Start jumping"\n• "Go faster / Go slower"\n• "Grow big / Shrink small"\n\n💡 Add a Gemini API key in Settings for full AI chat!`
+        `Here's what I can do for you:\n\n📋 **Goals:**\n• "List my daily goals"\n• "Add weekly goal called [name]"\n• "Complete goal [name]"\n• "Delete goal [name]"\n• "How am I doing?"\n• "Tell me about goal [name]"\n\n🎛 **My settings:**\n• "Become a circle/square"\n• "Stop moving / Start moving"\n• "Stop jumping / Start jumping"\n• "Go faster / Go slower"\n• "Grow big / Shrink small"`
       ), 400);
     }
 
     else {
-      setTimeout(() => bot(`Hmm, I didn't quite catch that! Type "help" to see everything I can do. (Or add a Gemini key in Settings for full AI!) 🤔`), 600);
+      setTimeout(() => bot(`Hmm, I didn't quite catch that! Type "help" to see everything I can do. 🤔`), 600);
     }
   };
 
