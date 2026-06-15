@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { usePreferences } from '../PreferencesContext';
-import { Settings as SettingsIcon, Image as ImageIcon, Move, Square, Circle, User, Bot, Sparkles, Bell, Moon, Sun, Download, RefreshCcw, Camera, Trash2, X, Plus, Edit3, Check, Zap, Smartphone } from 'lucide-react';
+import { Settings as SettingsIcon, Image as ImageIcon, Move, Square, Circle, User, Bot, Sparkles, Bell, Moon, Sun, Download, RefreshCcw, Camera, Trash2, X, Plus, Edit3, Check, Zap, Smartphone, Key, ExternalLink, CheckCircle2, AlertCircle } from 'lucide-react';
 import PresetManager from './PresetManager';
 import MobileSync from './MobileSync';
 
@@ -10,6 +10,32 @@ export default function Settings() {
   const [previewShyImage, setPreviewShyImage] = useState(preferences.botShyImage || preferences.botImage);
   const [previewAngryImage, setPreviewAngryImage] = useState(preferences.botAngryImage);
   const [previewAvatar, setPreviewAvatar] = useState(preferences.userAvatar);
+  const [geminiKey, setGeminiKey] = useState(preferences.geminiApiKey || '');
+  const [geminiStatus, setGeminiStatus] = useState(null); // null | 'testing' | 'ok' | 'error'
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
+
+  const testGeminiKey = async (key) => {
+    if (!key.trim()) return;
+    setGeminiStatus('testing');
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key.trim()}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: 'Say hi in one word.' }] }] })
+        }
+      );
+      if (res.ok) {
+        setGeminiStatus('ok');
+        updatePreference('geminiApiKey', key.trim());
+      } else {
+        setGeminiStatus('error');
+      }
+    } catch {
+      setGeminiStatus('error');
+    }
+  };
 
   const compressImage = (file, maxWidth, maxHeight, callback) => {
     const reader = new FileReader();
@@ -703,6 +729,83 @@ export default function Settings() {
               </button>
             </div>
 
+          </div>
+
+          {/* ── AI Brain (Gemini) ── */}
+          <div className="mt-12 pt-12 border-t border-white/5">
+            <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-2 uppercase tracking-tighter">
+              <Key className="w-5 h-5 text-primary" />
+              AI Brain — Gemini
+            </h3>
+            <p className="text-sm text-zinc-500 mb-6">Connect a free Gemini API key to give your bot real AI intelligence. It can then answer any question, not just preset commands.</p>
+
+            <div className="glass-panel p-6 rounded-2xl space-y-4" style={{ backgroundColor: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-white">Gemini API Key</p>
+                  <p className="text-xs text-zinc-500 mt-0.5">Free — no credit card required</p>
+                </div>
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-primary hover:text-blue-400 transition-colors font-medium"
+                >
+                  Get free key <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type={showGeminiKey ? 'text' : 'password'}
+                    value={geminiKey}
+                    onChange={(e) => { setGeminiKey(e.target.value); setGeminiStatus(null); }}
+                    placeholder="AIza..."
+                    className="w-full bg-black/30 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-primary/60 pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowGeminiKey(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors text-xs"
+                  >
+                    {showGeminiKey ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                <button
+                  onClick={() => testGeminiKey(geminiKey)}
+                  disabled={!geminiKey.trim() || geminiStatus === 'testing'}
+                  className="px-5 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: 'var(--primary)', color: 'white' }}
+                >
+                  {geminiStatus === 'testing' ? '...' : 'Save & Test'}
+                </button>
+              </div>
+
+              {/* Status */}
+              {geminiStatus === 'ok' && (
+                <div className="flex items-center gap-2 text-sm text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Connected! Your bot now has real AI intelligence.
+                </div>
+              )}
+              {geminiStatus === 'error' && (
+                <div className="flex items-center gap-2 text-sm text-red-400">
+                  <AlertCircle className="w-4 h-4" />
+                  Invalid key. Make sure you copied it correctly from AI Studio.
+                </div>
+              )}
+              {preferences.geminiApiKey && geminiStatus === null && (
+                <div className="flex items-center gap-2 text-sm text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" />
+                  API key is saved and active.
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-white/5">
+                <p className="text-xs text-zinc-600">Key is stored only in your browser (localStorage). Never sent anywhere except Google's API.</p>
+              </div>
+            </div>
           </div>
 
           {/* ── Data Management & Control ── */}

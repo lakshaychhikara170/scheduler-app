@@ -274,6 +274,48 @@ export default function RoamingBot() {
     return 'daily';
   };
 
+  // ── Gemini AI call ─────────────────────────────────────────────────
+  const callGemini = async (userMessage) => {
+    const key = preferences.geminiApiKey;
+    if (!key) return null;
+
+    const userName = preferences.userName || 'User';
+    const goalsSummary = appData.length
+      ? appData.slice(0, 20).map(e =>
+          `- [${e.recurrence_rule}] "${e.title}" (${e.status}${e.start_time ? ', due ' + new Date(e.start_time).toLocaleDateString() : ''})`
+        ).join('\n')
+      : 'No goals yet.';
+
+    const systemPrompt = `You are ${preferences.botName || 'Assistant Buddy'}, a cute and helpful scheduling assistant bot living inside a goal-tracking web app. You have a ${preferences.botPersonality || 'Sweet'} personality.
+
+The user's name is ${userName}.
+
+Here are their current goals (up to 20):
+${goalsSummary}
+
+You can chat naturally, answer questions about their goals, give motivation, and help them think through tasks. Keep replies concise (1-3 sentences max). Stay in character — you're a friendly, slightly quirky scheduling companion. Never break character. Add a relevant emoji occasionally.`;
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+            generationConfig: { maxOutputTokens: 150, temperature: 0.8 }
+          })
+        }
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    } catch {
+      return null;
+    }
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
     const cmd = input.trim();
@@ -283,6 +325,15 @@ export default function RoamingBot() {
 
     const lc = cmd.toLowerCase();
     await refreshAppData();
+
+    // ── Try Gemini first if API key exists ───────────────────────────
+    if (preferences.geminiApiKey) {
+      const aiReply = await callGemini(cmd);
+      if (aiReply) {
+        setTimeout(() => bot(aiReply), 300);
+        return;
+      }
+    }
 
     // ── APP DATA QUERIES ──────────────────────────────────────────────
     if (lc.match(/(show|list|what are|tell me|how many).*(goal|task)/)) {
@@ -439,14 +490,15 @@ export default function RoamingBot() {
     // ── HELP ─────────────────────────────────────────────────────────
     else if (lc.match(/(help|what can you do|commands)/)) {
       setTimeout(() => bot(
-        `Here's what I can do for you:\n\n📋 **Goals:**\n• "List my daily goals"\n• "Add weekly goal called [name]"\n• "Complete goal [name]"\n• "Delete goal [name]"\n• "How am I doing?"\n• "Tell me about goal [name]"\n\n🎛 **My settings:**\n• "Become a circle/square"\n• "Stop moving / Start moving"\n• "Stop jumping / Start jumping"\n• "Go faster / Go slower"\n• "Grow big / Shrink small"`
+        `Here's what I can do for you:\n\n📋 **Goals:**\n• "List my daily goals"\n• "Add weekly goal called [name]"\n• "Complete goal [name]"\n• "Delete goal [name]"\n• "How am I doing?"\n• "Tell me about goal [name]"\n\n🎛 **My settings:**\n• "Become a circle/square"\n• "Stop moving / Start moving"\n• "Stop jumping / Start jumping"\n• "Go faster / Go slower"\n• "Grow big / Shrink small"\n\n💡 Add a Gemini API key in Settings for full AI chat!`
       ), 400);
     }
 
     else {
-      setTimeout(() => bot(`Hmm, I didn't quite catch that! Type "help" to see everything I can do. 🤔`), 600);
+      setTimeout(() => bot(`Hmm, I didn't quite catch that! Type "help" to see everything I can do. (Or add a Gemini key in Settings for full AI!) 🤔`), 600);
     }
   };
+
 
   if (!preferences.botEnabled) return null;
 
