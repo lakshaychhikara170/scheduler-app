@@ -19,12 +19,11 @@ export default function Settings() {
     setGeminiStatus('testing');
     try {
       const res = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key.trim()}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': key.trim(), // Header is safer than URL query param
           },
           body: JSON.stringify({ contents: [{ parts: [{ text: 'Say hi in one word.' }] }] })
         }

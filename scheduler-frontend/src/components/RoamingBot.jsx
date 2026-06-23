@@ -297,12 +297,11 @@ You can chat naturally, answer questions about their goals, give motivation, and
 
     try {
       const res = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': key,  // Use header instead of URL query param (keeps key out of logs/history)
           },
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemPrompt }] },
