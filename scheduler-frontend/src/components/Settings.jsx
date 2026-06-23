@@ -343,6 +343,34 @@ export default function Settings() {
                         <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${preferences.notificationsEnabled ? 'left-7' : 'left-1'}`} />
                     </button>
                 </div>
+                {preferences.notificationsEnabled && (
+                  <button
+                    onClick={async () => {
+                      if (!("Notification" in window)) {
+                        alert("This browser does not support desktop notification");
+                      } else if (Notification.permission === "granted") {
+                        new Notification("Omniscient Scheduler", {
+                          body: "Upcoming: 'Finish Project Report' at 12:00 PM",
+                          icon: "/bot-icon.png"
+                        });
+                      } else if (Notification.permission !== "denied") {
+                        const permission = await Notification.requestPermission();
+                        if (permission === "granted") {
+                          new Notification("Omniscient Scheduler", {
+                            body: "Upcoming: 'Finish Project Report' at 12:00 PM",
+                            icon: "/bot-icon.png"
+                          });
+                        }
+                      } else {
+                        alert("Notifications are blocked by your browser settings. Please enable them.");
+                      }
+                    }}
+                    className="w-full py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 border border-blue-500/20 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 mt-2"
+                  >
+                    <Bell className="w-4 h-4" />
+                    Test PC Web Notification
+                  </button>
+                )}
             </div>
         </div>
 
