@@ -115,24 +115,47 @@ export default function MobileSync() {
             </div>
           </div>
 
-          <button 
-            onClick={async () => {
-              try {
-                await fetch(`https://ntfy.sh/${preferences.ntfyTopic}`, {
-                  method: 'POST',
-                  body: "Test notification from Omniscient Scheduler! 🚀",
-                  headers: { 'Title': 'Sync Success!', 'Priority': 'high', 'Tags': 'tada' }
-                });
-                alert('Test notification sent!');
-              } catch (e) {
-                alert('Failed to send test. Check your internet connection.');
-              }
-            }}
-            className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
-          >
-            <Zap className="w-4 h-4" />
-            Send Test Notification
-          </button>
+          <div className="space-y-3">
+            <button 
+              onClick={async () => {
+                try {
+                  await fetch(`https://ntfy.sh/${preferences.ntfyTopic}`, {
+                    method: 'POST',
+                    body: "Test notification from Omniscient Scheduler! 🚀",
+                    headers: { 'Title': 'Sync Success!', 'Priority': 'high', 'Tags': 'tada' }
+                  });
+                  alert('Test notification sent!');
+                } catch (e) {
+                  alert('Failed to send test. Check your internet connection.');
+                }
+              }}
+              className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Zap className="w-4 h-4" />
+              Send Test Notification
+            </button>
+            
+            <button 
+              onClick={async () => {
+                try {
+                  const mockTime = new Date();
+                  mockTime.setHours(mockTime.getHours() + 1);
+                  await fetch(`https://ntfy.sh/${preferences.ntfyTopic}`, {
+                    method: 'POST',
+                    body: `Upcoming: "Finish Project Report" at ${mockTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`,
+                    headers: { 'Title': 'Scheduler Reminder', 'Priority': 'high', 'Tags': 'calendar' }
+                  });
+                  alert('Deadline test notification sent!');
+                } catch (e) {
+                  alert('Failed to send test. Check your internet connection.');
+                }
+              }}
+              className="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Bell className="w-4 h-4" />
+              Test Deadline Notification
+            </button>
+          </div>
         </div>
       </div>
     </div>
