@@ -32,10 +32,12 @@ export default function Settings() {
         setGeminiStatus('ok');
         updatePreference('geminiApiKey', key.trim());
       } else {
-        setGeminiStatus('error');
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage = errorData?.error?.message || `HTTP ${res.status}: Failed to connect`;
+        setGeminiStatus(`error: ${errorMessage}`);
       }
-    } catch {
-      setGeminiStatus('error');
+    } catch (err) {
+      setGeminiStatus(`error: ${err.message}`);
     }
   };
 
@@ -823,10 +825,15 @@ export default function Settings() {
                   Connected! Your bot now has real AI intelligence.
                 </div>
               )}
-              {geminiStatus === 'error' && (
-                <div className="flex items-center gap-2 text-sm text-red-400">
-                  <AlertCircle className="w-4 h-4" />
-                  Invalid key. Make sure you copied it correctly from AI Studio.
+              {geminiStatus && geminiStatus.startsWith('error') && (
+                <div className="flex flex-col gap-1 mt-2">
+                  <div className="flex items-center gap-2 text-sm text-red-400">
+                    <AlertCircle className="w-4 h-4" />
+                    Google API Error:
+                  </div>
+                  <div className="text-xs text-red-400/80 bg-red-500/10 p-3 rounded-lg border border-red-500/20 break-words font-mono">
+                    {geminiStatus.replace('error: ', '')}
+                  </div>
                 </div>
               )}
               {preferences.geminiApiKey && geminiStatus === null && (
