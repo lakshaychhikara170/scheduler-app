@@ -21,7 +21,25 @@ export default function GoalList({ type }) {
 
   const getDefaultDeadline = () => {
     const d = new Date();
-    d.setHours(d.getHours() + 1);
+    if (type === 'daily') {
+      d.setHours(23, 59, 59, 999);
+    } else if (type === 'weekly') {
+      // Set to Sunday of the current week
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? 0 : 7); // adjust when day is sunday
+      d.setDate(diff);
+      d.setHours(23, 59, 59, 999);
+    } else if (type === 'monthly') {
+      // Set to last day of current month
+      d.setMonth(d.getMonth() + 1, 0);
+      d.setHours(23, 59, 59, 999);
+    } else if (type === 'yearly') {
+      // Set to Dec 31st
+      d.setMonth(11, 31);
+      d.setHours(23, 59, 59, 999);
+    } else {
+      d.setHours(d.getHours() + 1);
+    }
     const offset = d.getTimezoneOffset() * 60000;
     return new Date(d - offset).toISOString().slice(0, 16);
   };
