@@ -6,6 +6,7 @@ import RoamingBot from './components/RoamingBot';
 import Settings from './components/Settings';
 import CalendarView from './components/CalendarView';
 import Home from './components/Home';
+import useWebNotifications from './useWebNotifications';
 import { Target, CalendarDays, CalendarCheck, CalendarRange, Calendar, Settings as SettingsIcon, Zap } from 'lucide-react';
 
 // Moved outside component so it is stable and not re-created on every render
@@ -116,6 +117,7 @@ const Sidebar = () => {
 
 const AppLayout = () => {
   const { preferences } = usePreferences();
+  useWebNotifications(); // Enables continuous web notification checking
   
   const isLight = preferences.appTheme === 'Light';
   const glassIntensity = preferences.glassIntensity ?? 20;
