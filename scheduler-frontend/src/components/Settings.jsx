@@ -375,14 +375,14 @@ export default function Settings() {
                 
                 <div className="flex gap-2 mt-2">
                   <button
-                    onClick={() => window.dispatchEvent(new CustomEvent('system-overlay', { detail: { type: 'success' } }))}
+                    onClick={() => window.dispatchEvent(new CustomEvent('system-overlay', { detail: { type: 'success', isTest: true } }))}
                     className="flex-1 py-2 px-4 rounded-xl text-xs font-bold uppercase tracking-widest text-center transition-colors border"
                     style={{ backgroundColor: 'var(--panel-bg)', borderColor: 'rgba(59, 130, 246, 0.4)', color: '#60a5fa' }}
                   >
                     Test Quest Success
                   </button>
                   <button
-                    onClick={() => window.dispatchEvent(new CustomEvent('system-overlay', { detail: { type: 'fail', title: 'PENALTY', subtitle: 'Task Overdue' } }))}
+                    onClick={() => window.dispatchEvent(new CustomEvent('system-overlay', { detail: { type: 'fail', title: 'PENALTY', subtitle: 'Task Overdue', isTest: true } }))}
                     className="flex-1 py-2 px-4 rounded-xl text-xs font-bold uppercase tracking-widest text-center transition-colors border"
                     style={{ backgroundColor: 'var(--panel-bg)', borderColor: 'rgba(220, 38, 38, 0.4)', color: '#f87171' }}
                   >

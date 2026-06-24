@@ -90,6 +90,7 @@ export const PreferencesProvider = ({ children }) => {
       ntfyTopic: `scheduler_${Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2,'0')).join('')}`,
       mobileSyncEnabled: false,
       geminiApiKey: sessionStorage.getItem('scheduler_gemini_key') || '',
+      rpgStats: { successes: 0, penalties: 0 },
     };
   });
 
