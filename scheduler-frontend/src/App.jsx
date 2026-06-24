@@ -7,6 +7,7 @@ import Settings from './components/Settings';
 import CalendarView from './components/CalendarView';
 import Home from './components/Home';
 import useWebNotifications from './useWebNotifications';
+import SystemOverlay from './components/SystemOverlay';
 import { Target, CalendarDays, CalendarCheck, CalendarRange, Calendar, Settings as SettingsIcon, Zap } from 'lucide-react';
 
 // Moved outside component so it is stable and not re-created on every render
@@ -143,6 +144,7 @@ const AppLayout = () => {
 
   return (
     <BrowserRouter>
+      <SystemOverlay />
       <div 
         className={`flex h-screen overflow-hidden relative transition-colors duration-500 ${isLight ? 'light' : ''}`}
         style={{

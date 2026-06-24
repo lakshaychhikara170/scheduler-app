@@ -193,6 +193,7 @@ export default function GoalList({ type }) {
       if (newStatus === 'completed') {
         const msg = CONGRATS[Math.floor(Math.random() * CONGRATS.length)];
         window.dispatchEvent(new CustomEvent('bot-remark', { detail: { text: msg, type: 'celebrate', duration: 6000 } }));
+        window.dispatchEvent(new CustomEvent('system-overlay', { detail: { type: 'success' } }));
       }
     } catch (err) {
       console.error('Update failed');

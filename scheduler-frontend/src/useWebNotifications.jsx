@@ -37,6 +37,10 @@ export default function useWebNotifications() {
                 ? `TASK OVERDUE: The deadline has passed!` 
                 : `Upcoming: Starts at ${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
 
+              if (reminder.minutes_before === 0) {
+                window.dispatchEvent(new CustomEvent('system-overlay', { detail: { type: 'fail', title: 'PENALTY', subtitle: `Failed: ${goal.title}` } }));
+              }
+
               new Notification(title, {
                 body: message,
                 icon: '/bot-icon.png'
