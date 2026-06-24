@@ -366,12 +366,29 @@ export default function Settings() {
                         alert("Notifications are blocked by your browser settings. Please enable them.");
                       }
                     }}
-                    className="w-full py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 border border-blue-500/20 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 mt-2"
+                    className="w-full mt-2 py-2 px-4 rounded-xl text-xs font-bold uppercase tracking-widest text-center transition-colors border"
+                    style={{ backgroundColor: 'var(--panel-bg)', borderColor: 'var(--panel-border)', color: 'var(--text-main)' }}
                   >
-                    <Bell className="w-4 h-4" />
                     Test PC Web Notification
                   </button>
                 )}
+                
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('system-overlay', { detail: { type: 'success' } }))}
+                    className="flex-1 py-2 px-4 rounded-xl text-xs font-bold uppercase tracking-widest text-center transition-colors border"
+                    style={{ backgroundColor: 'var(--panel-bg)', borderColor: 'rgba(59, 130, 246, 0.4)', color: '#60a5fa' }}
+                  >
+                    Test Quest Success
+                  </button>
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('system-overlay', { detail: { type: 'fail', title: 'PENALTY', subtitle: 'Task Overdue' } }))}
+                    className="flex-1 py-2 px-4 rounded-xl text-xs font-bold uppercase tracking-widest text-center transition-colors border"
+                    style={{ backgroundColor: 'var(--panel-bg)', borderColor: 'rgba(220, 38, 38, 0.4)', color: '#f87171' }}
+                  >
+                    Test Penalty
+                  </button>
+                </div>
             </div>
         </div>
 
